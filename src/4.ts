@@ -1,27 +1,61 @@
 class Key {
-  constructor(private id: number) {}
+  constructor(private signature: number = Math.floor(Math.random() * 1000)) {}
 
-  getId(): number {
-    return this.id;
+  getSignature(): number {
+    return this.signature;
   }
 }
 
-class MyHouse {
-  constructor(private key: Key) {}
+abstract class House {
+  constructor(private houseKey: Key, private tenants: Person[] = []) {}
 
-  openDoor(key: Key): void {
-    if (this.key.getId() === key.getId()) {
+  abstract openDoor(externalKey: Key): void;
+
+  comeIn(person: Person): void {
+    if (this.tenants.includes(person)) {
+      console.log(`${person.getName()} is already inside.`);
+    } else {
+      console.log(`${person.getName()} is trying to come in.`);
+
+      if (
+        this.houseKey &&
+        person.getKey() &&
+        this.houseKey.getSignature() === person.getKey().getSignature()
+      ) {
+        console.log("Key is valid. Opening the door.");
+        this.tenants.push(person);
+        console.log(`${person.getName()} is now inside.`);
+      } else {
+        console.log("Invalid key. Access denied.");
+      }
+    }
+  }
+}
+
+class MyHouse extends House {
+  constructor(private key: Key) {
+    super(key);
+  }
+
+  openDoor(externalKey: Key): void {
+    if (this.getKey().getSignature() === externalKey.getSignature()) {
       console.log("Door is open");
+    } else {
+      console.log("Invalid key");
     }
   }
 
-  comeIn(person: Person): void {
-    console.log(`${person.getName()} is coming in.`);
+  getKey(): Key {
+    return this.key;
   }
 }
 
 class Person {
-  constructor(private key: Key, private name: string) {}
+  private key: Key;
+
+  constructor(private name: string) {
+    this.key = new Key();
+  }
 
   getKey(): Key {
     return this.key;
@@ -32,13 +66,12 @@ class Person {
   }
 }
 
-const key = new Key(123);
-
+const key = new Key();
 const house = new MyHouse(key);
-const person = new Person(key, "Bard");
+
+const person = new Person("Bard");
 
 house.openDoor(person.getKey());
-
 house.comeIn(person);
 
 export {};
