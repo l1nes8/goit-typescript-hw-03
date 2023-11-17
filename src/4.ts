@@ -7,7 +7,11 @@ class Key {
 }
 
 abstract class House {
-  constructor(private houseKey: Key, private tenants: Person[] = []) {}
+  constructor(
+    private houseKey: Key,
+    private tenants: Person[] = [],
+    private door: boolean = false
+  ) {}
 
   abstract openDoor(externalKey: Key): void;
 
@@ -17,18 +21,18 @@ abstract class House {
     } else {
       console.log(`${person.getName()} is trying to come in.`);
 
-      if (
-        this.houseKey &&
-        person.getKey() &&
-        this.houseKey.getSignature() === person.getKey().getSignature()
-      ) {
-        console.log("Key is valid. Opening the door.");
+      if (this.door) {
+        console.log("Door is open. Allowing access.");
         this.tenants.push(person);
         console.log(`${person.getName()} is now inside.`);
       } else {
-        console.log("Invalid key. Access denied.");
+        console.log("Door is closed. Access denied.");
       }
     }
+  }
+
+  setDoorStatus(status: boolean): void {
+    this.door = status;
   }
 }
 
@@ -40,8 +44,10 @@ class MyHouse extends House {
   openDoor(externalKey: Key): void {
     if (this.getKey().getSignature() === externalKey.getSignature()) {
       console.log("Door is open");
+      this.setDoorStatus(true);
     } else {
       console.log("Invalid key");
+      this.setDoorStatus(false);
     }
   }
 
